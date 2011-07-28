@@ -1,7 +1,7 @@
 /*!require: */
 !function($){
 	'use strict';
-	function cssIndie(i, el){
+	function embedCSS(i, el){
 		var styles = el.currentStyle || el.ownerDocument.defaultView.getComputedStyle(el);
 		for(var key in styles){
 			el.style[key] = styles[key];
@@ -55,8 +55,8 @@
 		this.push(adopted);
 	};
 	$.fn.extend({
-		cssIndie: function(){
-			return this.each(cssIndie);
+		embedCSS: function(){
+			return this.each(embedCSS);
 		},
 		adoptTo: function(winOrDoc){
 			var ret = [], doc;
