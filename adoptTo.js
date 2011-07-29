@@ -3,8 +3,31 @@
 	'use strict';
 	function embedCSS(i, el){
 		var styles = el.currentStyle || el.ownerDocument.defaultView.getComputedStyle(el);
+		var value, realKey, 
+			// on modern browser, we can only iterate numeric keys and 
+			// by accessing numeric keys, we can get the real css attribute name
+			// but in ie, we will iterate css attribute name directly
+			numericKey = styles.length == null? false: true;
+		
 		for(var key in styles){
-			el.style[key] = styles[key];
+			// style does not has hasOwnProoperty on ie < 9
+			if (styles.hasOwnProperty && !styles.hasOwnProperty(key)){
+				continue;
+			}
+			
+			// do not copy over the entire cssText
+			if (key === 'cssText' || key === 'length'){
+				continue;
+			}
+			
+			realKey = numericKey?styles[key]:key;
+			value = styles[realKey];
+			
+			if (value == null){
+				continue;
+			}
+			
+			el.style[realKey] = value;
 		}
 	};
 	function adoptNode(externalNode){
