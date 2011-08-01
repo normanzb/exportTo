@@ -30,7 +30,7 @@
 			el.style[realKey] = value;
 		}
 	};
-	function adoptNode(externalNode){
+	function importNode(externalNode){
 		var attr, style, key, value;
 		var adopted = this.createElement(externalNode.nodeName);
         // copy the attributes of the source element
@@ -48,7 +48,7 @@
 						}
 						catch(ex){
 							if (window.console){
-								window.console.log('adoptTo plugin failed to copy css: ' + key);
+								window.console.log('exportTo plugin failed to copy css: ' + key);
 							}
 						}
 					}
@@ -62,18 +62,15 @@
         // copy the entire contents of the source element
         adopted.innerHTML = externalNode.innerHTML;
 
-        // delete the source element
-        externalNode.parentNode.removeChild (externalNode);
-
 		return adopted
 	};
-	function adoptTo(doc, i, el){
+	function exportTo(doc, i, el){
 		var adopted;
-		if (doc.adoptNode){
-			adopted = doc.adoptNode(el);
+		if (doc.importNode){
+			adopted = doc.importNode(el);
 		}
 		else{
-			adopted = adoptNode.call(doc, el)
+			adopted = importNode.call(doc, el)
 		}
 		this.push(adopted);
 	};
@@ -81,7 +78,7 @@
 		embedCSS: function(){
 			return this.each(embedCSS);
 		},
-		adoptTo: function(winOrDoc){
+		exportTo: function(winOrDoc){
 			var ret = [], doc;
 
 			if (winOrDoc.createElement){
@@ -95,7 +92,7 @@
 			}
 			
 			this.each(function(i, el){
-				adoptTo.call(ret, doc, i, el);
+				exportTo.call(ret, doc, i, el);
 			});
 			
 			return $(ret);
