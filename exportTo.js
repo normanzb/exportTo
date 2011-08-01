@@ -1,34 +1,67 @@
 /*!require: */
 !function($){
     'use strict';
+
+    // an reference to console or noop
+    var control = {
+        log: window.console?window.console.log:$.noop
+    };
+
+    /**
+     * @function setCss
+     * set css in a safer way
+     */
+    function setCss(el, realKey, value){
+
+        try{
+            el.style[realKey] = value;
+        }
+        catch(ex){
+            control.log('jQuery.fn.exportTo: warnning: fail to set css ' +
+                realKey + ' , value ' + value + ', inner exception: ' + ex.message)
+        }
+    };
+
     function embedCSS(i, el){
+
         var styles = el.currentStyle || el.ownerDocument.defaultView.getComputedStyle(el);
-        var value, realKey,
+
+        var value, realKey, key, len,
             // on modern browser, we can only iterate numeric keys and
             // by accessing numeric keys, we can get the real css attribute name
             // but in ie, we will iterate css attribute name directly
+            // and on ie9 , it has length but cannot iterate indexes by for ( .. in ..)
             numericKey = styles.length == null? false: true;
 
-        for(var key in styles){
-            // style does not has hasOwnProoperty on ie < 9
-            if (styles.hasOwnProperty && !styles.hasOwnProperty(key)){
-                continue;
+        if (numericKey){
+            for(len = styles.length; len--;){
+                realKey = styles[len];
+
+                value = styles[realKey];
+
+                if (value == null){
+                    continue;
+                }
+
+                setCss(el, realKey, value);
             }
-
-            // do not copy over the entire cssText
-            if (key === 'cssText' || key === 'length'){
-                continue;
-            }
-
-            realKey = numericKey?styles[key]:key;
-            value = styles[realKey];
-
-            if (value == null){
-                continue;
-            }
-
-            el.style[realKey] = value;
         }
+        else{
+            for(realKey in styles){
+                if (styles.hasOwnProerty && !styles.hasOwnProperty(realKey)){
+                    continue;
+                }
+
+                value = styles[realKey];
+
+                if (value == null){
+                    continue;
+                }
+
+                setCss(el, realKey, value);
+            }
+        }
+
     };
     function importNode(externalNode, deep){
         var attr, style, key, value;
@@ -47,9 +80,7 @@
                             }
                         }
                         catch(ex){
-                            if (window.console){
-                                window.console.log('exportTo plugin failed to copy css: ' + key);
-                            }
+                            console.log('exportTo plugin failed to copy css: ' + key);
                         }
                     }
                 }
